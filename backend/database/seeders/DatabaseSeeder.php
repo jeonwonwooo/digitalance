@@ -28,11 +28,11 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         Administrator::create([
-            'username' => 'admin1',
+            'email' => 'admin1@email.com',
             'password' => bcrypt('admin123'), // Default password for admin
         ]);
         Administrator::create([
-            'username' => 'admin2',
+            'email' => 'admin2@email.com',
             'password' => bcrypt('admin123'), // Default password for admin
         ]);
 
