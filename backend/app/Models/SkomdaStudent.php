@@ -15,8 +15,8 @@ class SkomdaStudent extends Model
         return 'nis';
     }
 
-    public function freelancers()
+    public function freelancer()
     {
-        return $this->hasMany(Freelancer::class);
+        return $this->hasOne(Freelancer::class, 'student_id');
     }
 }
