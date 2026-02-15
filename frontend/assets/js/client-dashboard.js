@@ -40,7 +40,7 @@ accordionItems.forEach(item => {
     }
 });
 
-// How It Works Toggle
+// Switch Content
 const switchBtns = document.querySelectorAll('.switch-btn');
 const flowContents = document.querySelectorAll('.flow-content');
 
@@ -113,6 +113,7 @@ const observer = new IntersectionObserver((entries) => {
     });
 }, observerOptions);
 
+// Observe Elements
 document.querySelectorAll('.stat-card, .flow-step, .testimonial-card, .feature-card').forEach(el => {
     el.style.opacity = '0';
     el.style.transform = 'translateY(30px)';
