@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Administrator;
-use Illuminate\Http\Request;
 
 class AdministratorController extends Controller
 {
@@ -12,15 +11,12 @@ class AdministratorController extends Controller
      */
     public function index()
     {
-        //
-    }
+        $data = Administrator::all();
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
+        return response()->json([
+            'status' => true,
+            'data' => $data
+        ]);
     }
 
     /**
@@ -28,22 +24,9 @@ class AdministratorController extends Controller
      */
     public function show(Administrator $administrator)
     {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Administrator $administrator)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Administrator $administrator)
-    {
-        //
+        return response()->json([
+            'status' => true,
+            'data' => $administrator
+        ]);
     }
 }
