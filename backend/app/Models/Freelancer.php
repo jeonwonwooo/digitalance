@@ -35,4 +35,9 @@ class Freelancer extends Authenticatable
     {
         return $this->hasMany(Offer::class);
     }
+    
+    public function getRole()
+    {
+        return 'freelancer';
+    }
 }

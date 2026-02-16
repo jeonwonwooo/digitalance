@@ -15,4 +15,9 @@ class Client extends Authenticatable
     {
         return $this->hasMany(Order::class);
     }
+    
+    public function getRole()
+    {
+        return 'client';
+    }
 }

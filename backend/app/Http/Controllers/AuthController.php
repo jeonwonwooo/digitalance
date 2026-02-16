@@ -78,22 +78,26 @@ class AuthController extends Controller
 
         // attempt login as admin
         if (Auth::guard('administrator')->attempt($credentials)) {
-            $token = Auth::guard('administrator')->user()->createToken('admin_token', ['administrator'])->plainTextToken;
+            $admin = Auth::guard('administrator')->user();
+            $token = $admin->createToken('admin_token', ['administrator'])->plainTextToken;
             return response()->json([
                 'status' => true,
                 'message' => 'Login berhasil',
                 'role' => 'Admin',
+                'user' => $admin,
                 'token' => $token
             ]);
         }
 
         // attempt login as client
         if (Auth::guard('client')->attempt($credentials)) {
-            $token = Auth::guard('client')->user()->createToken('client_token', ['client'])->plainTextToken;
+            $client = Auth::guard('client')->user();
+            $token = $client->createToken('client_token', ['client'])->plainTextToken;
             return response()->json([
                 'status' => true,
                 'message' => 'Login berhasil',
                 'role' => 'Client',
+                'user' => $client,
                 'token' => $token
             ]);
         }
@@ -113,6 +117,7 @@ class AuthController extends Controller
                 'status' => true,
                 'message' => 'Login berhasil',
                 'role' => 'Freelancer',
+                'user' => $freelancer,
                 'token' => $token
             ]);
         }
