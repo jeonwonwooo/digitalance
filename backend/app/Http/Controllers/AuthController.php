@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Administrator;
 use App\Models\Client;
+use App\Models\Freelancer;
 use App\Models\SkomdaStudent;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -68,7 +70,7 @@ class AuthController extends Controller
             'message' => 'Registrasi berhasil'
         ]);
     }
-    
+
     public function login(Request $request)
     {
         $credentials = $request->validate([
@@ -126,6 +128,38 @@ class AuthController extends Controller
             'status' => false,
             'message' => 'Kredensial tidak valid'
         ], 401);
+    }
+
+    public function me(Request $request)
+    {
+        $user = $request->user();
+
+        if (!$user) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Unauthorized'
+            ], 401);
+        }
+
+        // detect user role
+        if ($user instanceof Administrator) {
+            $role = 'administrator';
+        } elseif ($user instanceof Client) {
+            $role = 'client';
+        } elseif ($user instanceof Freelancer) {
+            $role = 'freelancer';
+        } else {
+            return response()->json([
+                'status' => false,
+                'message' => 'User role tidak dikenali'
+            ], 400);
+        }
+
+        return response()->json([
+            'status' => true,
+            'role' => $role,
+            'data' => $user
+        ]);
     }
 
     public function logout(Request $request)
