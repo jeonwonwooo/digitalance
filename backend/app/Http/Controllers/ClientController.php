@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Client;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 
 class ClientController extends Controller
 {
@@ -90,6 +91,58 @@ class ClientController extends Controller
         return response()->json([
             'status' => true,
             'data' => $client
+        ]);
+    }
+
+    public function update_profile(Request $request)
+    {
+        $client = $request->user();
+
+        if (!$client) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Akun client tidak ditemukan'
+            ], 404);
+        }
+
+        $request->validate([
+            'name' => 'required|string',
+            'email' => 'required|email|unique:clients,email,' . $client->id,
+            'phone' => 'required|string',
+        ]);
+
+        $client->update($request->only(['name', 'email', 'phone']));
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Profil berhasil diperbarui',
+            'data' => $client
+        ]);
+    }
+
+    public function update_password(Request $request)
+    {
+        $client = $request->user();
+
+        $request->validate([
+            'current_password' => 'required|string',
+            'password' => 'required|string|min:6|confirmed',
+        ]);
+
+        if (!Hash::check($request->current_password, $client->password)) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Password lama salah'
+            ], 422);
+        }
+
+        $client->update([
+            'password' => Hash::make($request->password),
+        ]);
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Password berhasil diperbarui'
         ]);
     }
 

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Freelancer;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 
 class FreelancerController extends Controller
 {
@@ -65,6 +66,23 @@ class FreelancerController extends Controller
         ]);
     }
 
+    public function show_services(string $id)
+    {
+        $freelancer = Freelancer::with('services', 'skomda_student')->where('id', $id)->first();
+
+        if (!$freelancer) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Akun freelancer tidak ditemukan'
+            ], 404);
+        }
+
+        return response()->json([
+            'status' => true,
+            'data' => $freelancer
+        ]);
+    }
+
     /**
      * Update the specified resource in storage.
      */
@@ -90,6 +108,58 @@ class FreelancerController extends Controller
         return response()->json([
             'status' => true,
             'data' => $freelancer
+        ]);
+    }
+
+    public function update_profile(Request $request)
+    {
+        $freelancer = $request->user();
+
+        if (!$freelancer) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Akun freelancer tidak ditemukan'
+            ], 404);
+        }
+
+        $request->validate([
+            'name' => 'required|string',
+            'email' => 'required|email|unique:freelancers,email,' . $freelancer->id,
+            'phone' => 'required|string',
+        ]);
+
+        $freelancer->update($request->only(['name', 'email', 'phone']));
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Profil berhasil diperbarui',
+            'data' => $freelancer
+        ]);
+    }
+
+    public function update_password(Request $request)
+    {
+        $freelancer = $request->user();
+
+        $request->validate([
+            'current_password' => 'required|string',
+            'password' => 'required|string|min:6|confirmed',
+        ]);
+
+        if (!Hash::check($request->current_password, $freelancer->password)) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Password lama salah'
+            ], 422);
+        }
+
+        $freelancer->update([
+            'password' => Hash::make($request->password),
+        ]);
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Password berhasil diperbarui'
         ]);
     }
 
