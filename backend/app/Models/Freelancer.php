@@ -2,15 +2,18 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Laravel\Sanctum\HasApiTokens;
 
-class Freelancer extends Model
+class Freelancer extends Authenticatable
 {
+    use HasFactory, HasApiTokens;
     protected $fillable = ['student_id', 'bio', 'email', 'password', 'status'];
 
     public function skomda_student()
     {
-        return $this->belongsTo(SkomdaStudent::class);
+        return $this->belongsTo(SkomdaStudent::class, 'student_id');
     }
 
     public function portofolios()
@@ -31,5 +34,10 @@ class Freelancer extends Model
     public function offers()
     {
         return $this->hasMany(Offer::class);
+    }
+    
+    public function getRole()
+    {
+        return 'freelancer';
     }
 }
