@@ -1,303 +1,227 @@
-// State Management
-let currentMode = 'login';
-let currentRole = 'client';
+document.addEventListener('DOMContentLoaded', () => {
+    // --- KONFIGURASI STATE ---
+    let currentMode = 'login';
+    let currentRole = 'client';
+    let skills = [];
+    const MAX_SKILLS = 5;
 
-// DOMContentLoaded
-document.addEventListener('DOMContentLoaded', function() {
-    // DOM Elements
-    const authOverlay = document.getElementById('authOverlay');
-    const overlayToggle = document.getElementById('overlayToggle');
-    const toggleText = document.getElementById('toggleText');
-    const overlayTitle = document.getElementById('overlayTitle');
-    const overlayDesc = document.getElementById('overlayDesc');
-    const heroImage = document.getElementById('heroImage');
-    const loginPanel = document.getElementById('loginPanel');
-    const registerPanel = document.getElementById('registerPanel');
-    const clientBtn = document.getElementById('clientBtn');
-    const freelancerBtn = document.getElementById('freelancerBtn');
-    const roleSlider = document.getElementById('roleSlider');
-    const loginForm = document.getElementById('loginForm');
-    const registerForm = document.getElementById('registerForm');
-    const skillField = document.getElementById('skillField');
-    const skillInput = skillField?.querySelector('input');
+    // --- SELECTOR ELEMEN ---
+    const get = (id) => document.getElementById(id);
 
-    // Overlay Content
-    const overlayContent = {
+    const authOverlay = get('authOverlay');
+    const overlayToggle = get('overlayToggle');
+    const toggleText = get('toggleText');
+    const overlayTitle = get('overlayTitle');
+    const overlayDesc = get('overlayDesc');
+    const heroImage = get('heroImage');
+    
+    const loginPanel = get('loginPanel');
+    const registerPanel = get('registerPanel');
+    
+    const roleToggleContainer = get('roleToggleContainer');
+    const btnClient = get('btnClient'); 
+    const btnFreelancer = get('btnFreelancer');
+    
+    // PERBAIKAN: ID disamakan dengan HTML (skillFieldWrapper)
+    const skillFieldWrapper = get('skillFieldWrapper'); 
+    const tagsContainer = get('tagsContainer');
+    const skillInput = get('skillInput');
+    const tagLimitMsg = get('tagLimitMsg');
+    const hiddenSkillsInput = get('hiddenSkillsInput');
+
+    const contentData = {
         login: {
             title: 'Jaringan Presisi untuk Solusi Expert',
-            description: 'Rasakan koneksi tanpa hambatan antara permintaan industri premium dan output kreatif elite.',
-            toggleText: 'Bergabung dengan Jaringan',
-            image: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&q=80&w=1000'
+            desc: 'Rasakan koneksi tanpa hambatan antara permintaan industri premium dan output kreatif elite.',
+            btnText: 'Bergabung dengan Jaringan',
+            img: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&q=80&w=1000'
         },
         register: {
             title: 'Gerbang Premium Menuju Kesuksesan Global',
-            description: 'Buka akses ke proyek berskala tinggi dan komunitas pembangun digital kelas dunia.',
-            toggleText: 'Kembali ke Akses',
-            image: 'https://images.unsplash.com/photo-1600880292203-757bb62b4baf?auto=format&fit=crop&q=80&w=1000'
+            desc: 'Buka akses ke proyek berskala tinggi dan komunitas pembangun digital kelas dunia.',
+            btnText: 'Kembali ke Akses',
+            img: 'https://images.unsplash.com/photo-1600880292203-757bb62b4baf?auto=format&fit=crop&q=80&w=1000'
         }
     };
 
-    // Initialize Skill Field
-    function initSkillField() {
-        if (!skillField) return;
-        
-        if (currentRole === 'client') {
-            skillField.style.display = 'none';
-            skillField.style.opacity = '0';
-            skillField.style.height = '0';
-            skillField.style.margin = '0';
-            skillField.style.padding = '0';
-            skillField.style.overflow = 'hidden';
-            if (skillInput) skillInput.required = false;
-        } else {
-            skillField.style.display = 'block';
-            skillField.style.opacity = '1';
-            skillField.style.height = 'auto';
-            skillField.style.margin = '';
-            skillField.style.padding = '';
-            skillField.style.overflow = 'visible';
-            if (skillInput) skillInput.required = true;
-        }
-    }
-
-    // Toggle Mode Function
-    function toggleMode() {
-        if (currentMode === 'login') {
-            currentMode = 'register';
-            authOverlay?.classList.add('register-mode');
-            
-            if (loginPanel) {
+    // --- 1. TOGGLE LOGIN / REGISTER ---
+    if (overlayToggle) {
+        overlayToggle.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (currentMode === 'login') {
+                currentMode = 'register';
+                authOverlay.classList.add('register-mode');
                 loginPanel.classList.remove('active');
                 loginPanel.classList.add('inactive');
-            }
-            if (registerPanel) {
                 registerPanel.classList.remove('inactive');
                 registerPanel.classList.add('active');
-            }
-            
-            if (currentRole !== 'client') {
-                toggleRole('client');
+                updateRoleUI('client'); // Reset ke klien saat buka register
             } else {
-                initSkillField();
-            }
-        } else {
-            currentMode = 'login';
-            authOverlay?.classList.remove('register-mode');
-            
-            if (registerPanel) {
+                currentMode = 'login';
+                authOverlay.classList.remove('register-mode');
                 registerPanel.classList.remove('active');
                 registerPanel.classList.add('inactive');
-            }
-            if (loginPanel) {
                 loginPanel.classList.remove('inactive');
                 loginPanel.classList.add('active');
             }
-        }
-        
-        // Update Overlay Content
-        const content = overlayContent[currentMode];
-        if (content) {
-            [overlayTitle, overlayDesc, toggleText].forEach(el => {
-                if (el) el.style.opacity = '0';
-            });
+            
+            const data = contentData[currentMode];
+            [overlayTitle, overlayDesc, toggleText].forEach(el => { if(el) el.style.opacity = 0; });
+            if (heroImage) heroImage.classList.add('fade-out');
             
             setTimeout(() => {
-                if (overlayTitle) overlayTitle.textContent = content.title;
-                if (overlayDesc) overlayDesc.textContent = content.description;
-                if (toggleText) toggleText.textContent = content.toggleText;
-                if (heroImage) heroImage.src = content.image;
-                
-                [overlayTitle, overlayDesc, toggleText].forEach(el => {
-                    if (el) el.style.opacity = '1';
-                });
-            }, 200);
+                if (overlayTitle) overlayTitle.textContent = data.title;
+                if (overlayDesc) overlayDesc.textContent = data.desc;
+                if (toggleText) toggleText.textContent = data.btnText;
+                if (heroImage) {
+                    heroImage.src = data.img;
+                    heroImage.onload = () => heroImage.classList.remove('fade-out');
+                }
+                [overlayTitle, overlayDesc, toggleText].forEach(el => { if(el) el.style.opacity = 1; });
+            }, 300);
+        });
+    }
+
+    // --- 2. LOGIKA TOGGLE ROLE (KLIEN / FREELANCER) ---
+    function updateRoleUI(role) {
+        currentRole = role;
+        if (!roleToggleContainer || !btnClient || !btnFreelancer) return;
+
+        if (role === 'freelancer') {
+            roleToggleContainer.classList.add('freelancer-active');
+            btnFreelancer.classList.add('active');
+            btnClient.classList.remove('active');
+            
+            // MUNCULKAN FIELD KEAHLIAN
+            if (skillFieldWrapper) {
+                skillFieldWrapper.style.display = 'block';
+                // Trigger reflow untuk animasi
+                void skillFieldWrapper.offsetWidth; 
+                skillFieldWrapper.style.opacity = '1';
+                skillFieldWrapper.style.transform = 'translateY(0)';
+            }
+        } else {
+            roleToggleContainer.classList.remove('freelancer-active');
+            btnClient.classList.add('active');
+            btnFreelancer.classList.remove('active');
+            
+            // SEMBUNYIKAN FIELD KEAHLIAN
+            if (skillFieldWrapper) {
+                skillFieldWrapper.style.opacity = '0';
+                skillFieldWrapper.style.transform = 'translateY(-10px)';
+                setTimeout(() => {
+                    if (currentRole === 'client') {
+                        skillFieldWrapper.style.display = 'none';
+                    }
+                }, 300);
+            }
         }
     }
 
-    // Toggle Role Function
-    function toggleRole(role) {
-        if (role === currentRole) return;
-        
-        if (registerForm) {
-            registerForm.style.opacity = '0';
-            registerForm.style.transform = 'translateY(10px)';
+    if (btnClient) btnClient.addEventListener('click', () => updateRoleUI('client'));
+    if (btnFreelancer) btnFreelancer.addEventListener('click', () => updateRoleUI('freelancer'));
+
+    // --- 3. SISTEM TAGS INPUT ---
+    if (tagsContainer && skillInput) {
+        tagsContainer.addEventListener('click', (e) => {
+            if (e.target !== skillInput) skillInput.focus();
+        });
+
+        function renderTags() {
+            const currentTags = tagsContainer.querySelectorAll('.tag-item');
+            currentTags.forEach(tag => tag.remove());
+
+            skills.slice().reverse().forEach(skill => {
+                const tag = document.createElement('span');
+                tag.classList.add('tag-item');
+                tag.innerHTML = `${skill}<span class="tag-close" data-val="${skill}"><i class="fa-solid fa-xmark"></i></span>`;
+                tagsContainer.prepend(tag);
+            });
+
+            if (tagLimitMsg) {
+                tagLimitMsg.textContent = `${skills.length}/${MAX_SKILLS} Keahlian`;
+                if (skills.length >= MAX_SKILLS) {
+                    tagLimitMsg.classList.add('limit-reached');
+                    skillInput.placeholder = "Penuh";
+                    skillInput.disabled = true;
+                } else {
+                    tagLimitMsg.classList.remove('limit-reached');
+                    skillInput.placeholder = "Ketik lalu Enter...";
+                    skillInput.disabled = false;
+                }
+            }
+            if (hiddenSkillsInput) hiddenSkillsInput.value = JSON.stringify(skills);
         }
-        
-        setTimeout(() => {
-            currentRole = role;
-            
-            if (role === 'client') {
-                clientBtn?.classList.add('active');
-                freelancerBtn?.classList.remove('active');
-                roleSlider?.classList.remove('freelancer');
-                
-                if (skillField) {
-                    skillField.style.height = skillField.offsetHeight + 'px';
-                    void skillField.offsetHeight;
-                    skillField.style.height = '0';
-                    skillField.style.opacity = '0';
-                    skillField.style.margin = '0';
-                    skillField.style.padding = '0';
-                    skillField.style.overflow = 'hidden';
-                    
-                    setTimeout(() => {
-                        if (currentRole === 'client') {
-                            skillField.style.display = 'none';
-                        }
-                    }, 300);
-                    
-                    if (skillInput) skillInput.required = false;
-                }
-            } else {
-                freelancerBtn?.classList.add('active');
-                clientBtn?.classList.remove('active');
-                roleSlider?.classList.add('freelancer');
-                
-                if (skillField) {
-                    skillField.style.display = 'block';
-                    skillField.style.height = '0';
-                    skillField.style.opacity = '0';
-                    skillField.style.overflow = 'hidden';
-                    
-                    void skillField.offsetHeight;
-                    
-                    skillField.style.height = 'auto';
-                    const targetHeight = skillField.offsetHeight + 'px';
-                    
-                    skillField.style.height = '0';
-                    void skillField.offsetHeight;
-                    
-                    skillField.style.height = targetHeight;
-                    skillField.style.opacity = '1';
-                    skillField.style.margin = '';
-                    skillField.style.padding = '';
-                    skillField.style.overflow = 'visible';
-                    
-                    if (skillInput) skillInput.required = true;
-                    
-                    setTimeout(() => {
-                        if (currentRole === 'freelancer') {
-                            skillField.style.height = 'auto';
-                        }
-                    }, 300);
+
+        skillInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ',') {
+                e.preventDefault();
+                const val = skillInput.value.trim();
+                if (val && skills.length < MAX_SKILLS && !skills.includes(val)) {
+                    skills.push(val);
+                    skillInput.value = '';
+                    renderTags();
                 }
             }
-            
-            if (registerForm) {
-                registerForm.style.opacity = '1';
-                registerForm.style.transform = 'translateY(0)';
+            if (e.key === 'Backspace' && skillInput.value === '' && skills.length > 0) {
+                skills.pop();
+                renderTags();
             }
-        }, 100);
+        });
+
+        tagsContainer.addEventListener('click', (e) => {
+            const closeBtn = e.target.closest('.tag-close');
+            if (closeBtn) {
+                const valToRemove = closeBtn.dataset.val;
+                skills = skills.filter(s => s !== valToRemove);
+                renderTags();
+            }
+        });
     }
 
-    // Event Listeners
-    overlayToggle?.addEventListener('click', toggleMode);
-    clientBtn?.addEventListener('click', () => toggleRole('client'));
-    freelancerBtn?.addEventListener('click', () => toggleRole('freelancer'));
+// --- 6. LOGIKA SUBMIT (DENGAN REQUIREMENT) ---
+    if (loginForm) {
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = loginForm.querySelector('input[type="email"]').value.trim();
+            const pass = loginForm.querySelector('input[type="password"]').value.trim();
 
-    // Login Form Submit
-    loginForm?.addEventListener('submit', (e) => {
-        e.preventDefault();
-        
-        const email = loginForm.querySelector('input[type="email"]')?.value;
-        const password = loginForm.querySelector('input[type="password"]')?.value;
-        
-        if (!email || !password) {
-            alert('Email dan password harus diisi!');
-            return;
-        }
-        
-        window.location.href = 'client-dashboard.html';
-    });
-
-    // Register Form Submit
-    registerForm?.addEventListener('submit', (e) => {
-        e.preventDefault();
-        
-        const firstName = registerForm.querySelector('input[placeholder="John"]')?.value;
-        const lastName = registerForm.querySelector('input[placeholder="Doe"]')?.value;
-        const email = registerForm.querySelector('input[type="email"]')?.value;
-        const password = registerForm.querySelector('input[type="password"]')?.value;
-        
-        if (!firstName || !lastName || !email || !password) {
-            alert('Semua field harus diisi!');
-            return;
-        }
-        
-        let skill = '';
-        if (currentRole === 'freelancer') {
-            skill = skillInput?.value || '';
-            if (!skill) {
-                alert('Field Keahlian harus diisi untuk Freelancer!');
+            // Requirement Check
+            if (!email || !pass) {
+                alert('⚠️ Protokol Gagal: Email dan Password wajib diisi!');
                 return;
             }
-        }
-        
-        console.log('Data registrasi:', {
-            role: currentRole,
-            firstName,
-            lastName,
-            email,
-            skill: skill || '-',
-            password: '***hidden***'
+
+            const target = (currentRole === 'freelancer') ? './freelancer-dashboard.html' : './client-dashboard.html';
+            alert(`✅ Otorisasi Berhasil! Login sebagai ${currentRole.toUpperCase()}`);
+            window.location.href = target;
         });
-        
-        alert(`Registrasi sebagai ${currentRole.toUpperCase()} berhasil!\n\nData:\n- Nama: ${firstName} ${lastName}\n- Email: ${email}\n${currentRole === 'freelancer' ? `- Keahlian: ${skill}\n` : ''}`);
-    });
-
-    // Social Buttons
-    document.querySelectorAll('.social-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            e.preventDefault();
-            const provider = btn.textContent.trim().split(' ')[0];
-            alert(`Login dengan ${provider} (Demo)`);
-        });
-    });
-
-    // Tags Click
-    document.querySelectorAll('.tag').forEach(tag => {
-        tag.addEventListener('click', () => {
-            tag.style.transform = 'scale(1.1)';
-            setTimeout(() => tag.style.transform = 'scale(1)', 200);
-        });
-    });
-
-    // Forgot Password
-    document.querySelector('.forgot-link')?.addEventListener('click', (e) => {
-        e.preventDefault();
-        const email = loginForm?.querySelector('input[type="email"]')?.value;
-        if (email) {
-            alert(`Link reset password dikirim ke ${email}`);
-        } else {
-            alert('Masukkan email Anda terlebih dahulu');
-        }
-    });
-
-    // Setup Transitions
-    if (skillField) {
-        skillField.style.transition = 'height 0.3s ease, opacity 0.3s ease, margin 0.3s ease, padding 0.3s ease';
     }
-    
-    [overlayTitle, overlayDesc, toggleText].forEach(el => {
-        if (el) el.style.transition = 'opacity 0.3s ease';
-    });
 
     if (registerForm) {
-        registerForm.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+        registerForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const firstName = registerForm.querySelector('input[placeholder="John"]').value.trim();
+            const lastName = registerForm.querySelector('input[placeholder="Doe"]').value.trim();
+            const email = registerForm.querySelector('input[type="email"]').value.trim();
+            const pass = registerForm.querySelector('input[type="password"]').value.trim();
+
+            // Requirement Check
+            if (!firstName || !lastName || !email || !pass) {
+                alert('⚠️ Peringatan: Semua kolom identitas wajib diisi!');
+                return;
+            }
+
+            // Freelancer Requirement Check
+            if (currentRole === 'freelancer' && skills.length === 0) {
+                alert('⚠️ Freelancer diwajibkan menyertakan minimal 1 keahlian!');
+                return;
+            }
+
+            alert(`✅ Identitas ${firstName} berhasil dibuat! Silakan lakukan otorisasi masuk.`);
+            overlayToggle.click(); 
+        });
     }
 
-    // Initialize App
-    initSkillField();
-    
-    if (currentMode === 'login') {
-        loginPanel?.classList.add('active');
-        loginPanel?.classList.remove('inactive');
-        registerPanel?.classList.add('inactive');
-        registerPanel?.classList.remove('active');
-    } else {
-        registerPanel?.classList.add('active');
-        registerPanel?.classList.remove('inactive');
-        loginPanel?.classList.add('inactive');
-        loginPanel?.classList.remove('active');
-    }
+    updateRoleUI('client');
 });
